@@ -21,13 +21,13 @@ const routes: RouteRecordRaw[] = [
 			{
 				path: '',
 				name: 'private.cards',
-				component: () => import('pages/CardsPage.vue'),
+				component: () => import('pages/CardListPage.vue'),
 				meta: { requiresAuth: true }
 			},
 			{
 				path: 'cards/:id',
 				name: 'private.cards-form',
-				component: () => import('pages/CardsFormPage.vue'),
+				component: () => import('src/pages/CardFormPage.vue'),
 				props: (route) => ({ id: route.params.id }),
 				meta: { requiresAuth: true }
 			}

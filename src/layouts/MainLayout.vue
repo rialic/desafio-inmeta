@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { EssentialLinkProps } from '@/types/mainTypes'
-import EssentialLink from 'components/EssentialLink.vue'
+import type { BasicLinkProps } from '@/types/mainTypes'
+import BasicLink from 'components/BasicLink.vue'
 
 import { useAuthStore } from '@/stores/authStore'
 
@@ -10,11 +10,11 @@ const authStore = useAuthStore()
 
 const router = useRouter()
 const leftDrawerOpen = ref(false)
-const linksList: EssentialLinkProps[] = [
+const linksList: BasicLinkProps[] = [
 	{
 		title: 'Cartões',
 		icon: 'fa-solid fa-square-poll-horizontal',
-		link: 'https://quasar.dev'
+		link: '/home'
 	},
 	{
 		title: 'Solicitações de troca',
@@ -73,7 +73,7 @@ function toggleLeftDrawer() {
 						Desafio InMeta
 					</q-item-label>
 
-					<EssentialLink
+					<BasicLink
 						v-for="(link, index) in linksList"
 						:key="index"
 						v-bind="link"

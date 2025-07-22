@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { format, parseISO } from 'date-fns'
 import BasicPaginator from '@/components/BasicPaginator.vue'
@@ -15,12 +15,26 @@ const quasar = useQuasar()
 const cards = ref<Array<Card>>([])
 const shownCardInfoDialog = ref<boolean>(false)
 const shownCardAddDialog = ref<boolean>(false)
+const shownSelectedCardsDialog = ref<boolean>(false)
+const selectedCards = ref<Array<{ id: string, name: string }>>([])
 const selectedCard = ref<Card | null>(null)
 const typeList = ref<string>('my')
 
 const currentPage = ref<number>(1)
 const hasMore = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
+
+/* Computed */
+const selectedCardsText = computed(() => {
+	const count = selectedCards.value.length
+	if (count === 0) return '0 Item selecionado'
+	if (count === 1) return '1 Item selecionado'
+	return `${count} Itens selecionados`
+})
+
+const toggleCardSelectionStyle = computed(() => {
+	return (card: any) => ({ border: isCardSelected(card.id) ? '2px solid currentColor' : undefined })
+})
 
 /* onMounted */
 onMounted(async () => {
@@ -30,6 +44,7 @@ onMounted(async () => {
 /* Watch */
 watch(typeList, async (newType: string) => {
 	if (newType) {
+		selectedCards.value = []
 		await loadCards(1)
 	}
 })
@@ -57,9 +72,9 @@ async function loadCards(page: number) {
 	}
 }
 
-async function addToCollection() {
+async function addToCollection(id: string | Array<string>) {
 	try {
-		const { status } = await cardsStore.store({ cardIds: [selectedCard.value!.id] })
+		const { status } = await cardsStore.store({ cardIds: !Array.isArray(id) ? [id] : id })
 
 		if (status === 200) {
 			selectedCard.value = null
@@ -81,7 +96,25 @@ async function addToCollection() {
 	} finally {
 		isLoading.value = false
 		shownCardAddDialog.value = false
+		shownSelectedCardsDialog.value = false
+		selectedCards.value = []
 	}
+}
+
+function toggleCardSelection(card: Card) {
+	if (typeList.value !== 'all') return
+
+	const existingIndex = selectedCards.value.findIndex(item => item.id === card.id)
+
+	if (existingIndex > -1) {
+		selectedCards.value.splice(existingIndex, 1)
+	} else {
+		selectedCards.value.push({ id: card.id, name: card.name })
+	}
+}
+
+function isCardSelected(cardId: string): boolean {
+	return selectedCards.value.some(item => item.id === cardId)
 }
 
 function openCardDialog(card: Card, typeDialog: string) {
@@ -95,6 +128,12 @@ function openCardDialog(card: Card, typeDialog: string) {
 
 	selectedCard.value = card
 }
+
+function openSelectedCardsDialog() {
+	if (selectedCards.value.length > 0) {
+		shownSelectedCardsDialog.value = true
+	}
+}
 </script>
 
 <template>
@@ -105,13 +144,14 @@ function openCardDialog(card: Card, typeDialog: string) {
 
 		<div class="flex q-gutter-md">
 			<q-btn
+				v-if="typeList === 'all'"
 				dense
 				no-caps
 				unelevated
 				:ripple="false"
 				color="grey-9 q-px-sm q-pt-xs"
-				label="Novo cartão"
-				@click="router.push({ name: '' })"
+				:label="selectedCardsText"
+				@click="typeList === 'all' ? openSelectedCardsDialog() : router.push({ name: '' })"
 			>
 			</q-btn>
 		</div>
@@ -162,12 +202,31 @@ function openCardDialog(card: Card, typeDialog: string) {
 						:class="[cards.length > 4 ? 'col-12 col-sm-6 col-md-4 col-lg-3' : 'col']"
 						v-for="card in cards"
 						:key="card.id"
+						class="relative-position"
 					>
+						<div
+							v-if="typeList === 'all' && isCardSelected(card.id)"
+							class="absolute-top-right"
+							style="z-index: 1; right: -10px;"
+						>
+							<q-icon
+								name="fa-solid fa-check"
+								size="xs"
+								class="bg-white q-pa-xs shadow-2"
+								style="border-radius: 50%;"
+							/>
+						</div>
+
 						<q-card
 							flat
 							bordered
+							:style="toggleCardSelectionStyle(card)"
 						>
-							<div class="q-py-sm q-px-md">
+							<div
+								class="q-py-sm q-px-md"
+								:class="{ 'cursor-pointer': typeList === 'all' }"
+								@click="typeList === 'all' ? toggleCardSelection(card) : undefined"
+							>
 								<div
 									class="relative-position"
 									style="height: 300px;"
@@ -378,7 +437,7 @@ function openCardDialog(card: Card, typeDialog: string) {
 					color="grey-9"
 					unelevated
 					:disable="isLoading"
-					@click="addToCollection"
+					@click="addToCollection(selectedCard!.id)"
 				>
 					<div class="flex items-center q-gutter-sm q-px-sm">
 						<div class="text-center">
@@ -409,6 +468,100 @@ function openCardDialog(card: Card, typeDialog: string) {
 						<i class="fa-solid fa-xmark fa-md" />
 					</div>
 				</q-btn>
+			</q-card-actions>
+		</q-card>
+	</q-dialog>
+
+	<q-dialog
+		v-model="shownSelectedCardsDialog"
+		persistent
+	>
+		<q-card style="min-width: 600px;">
+			<q-card-section class="flex justify-between q-py-sm">
+				<div class="flex column">
+					<div class="text-h6 text-grey-9">Cartões Selecionados</div>
+					<div class="text-body2 text-grey-8">{{ selectedCards.length }} item(s) selecionado(s)</div>
+				</div>
+
+				<q-btn
+					icon="fa-solid fa-xmark"
+					flat
+					round
+					dense
+					size="sm"
+					color="grey-9"
+					v-close-popup
+				/>
+			</q-card-section>
+
+			<q-separator />
+
+			<q-card-section
+				class="q-pa-md"
+				style="max-height: 400px;"
+			>
+				<q-scroll-area style="height: 300px;">
+					<div
+						v-if="selectedCards.length === 0"
+						class="text-center text-grey-6"
+					>
+						Nenhum cartão selecionado
+					</div>
+					<div v-else>
+						<div
+							v-for="(card, index) in selectedCards"
+							:key="card.id"
+							class="flex items-center justify-between q-py-sm q-px-md bg-grey-1 rounded-borders q-mb-sm"
+						>
+							<div class="flex column">
+								<div class="text-body1 text-weight-medium">{{ card.name }}</div>
+								<div class="text-body2 text-grey-7">ID: {{ card.id }}</div>
+							</div>
+
+							<q-btn
+								icon="fa-solid fa-trash"
+								flat
+								round
+								dense
+								size="sm"
+								color="negative"
+								@click="selectedCards.splice(index, 1)"
+							/>
+						</div>
+					</div>
+				</q-scroll-area>
+			</q-card-section>
+
+			<q-separator />
+
+			<q-card-actions align="right">
+				<q-btn
+					no-caps
+					dense
+					color="grey-9"
+					unelevated
+					:disable="isLoading || selectedCards.length === 0"
+					@click="addToCollection(selectedCards.map(card => card.id))"
+				>
+					<div class="flex items-center q-gutter-sm q-px-sm">
+						<div class="text-center">
+							<span class="text-weight-medium">
+								Adicionar
+							</span>
+						</div>
+						<i class="fa-solid fa-circle-plus fa-md" />
+					</div>
+				</q-btn>
+
+				<q-btn
+					no-caps
+					dense
+					label="Fechar"
+					color="grey-9"
+					unelevated
+					:disable="isLoading"
+					v-close-popup
+				/>
 			</q-card-actions>
 		</q-card>
 	</q-dialog>

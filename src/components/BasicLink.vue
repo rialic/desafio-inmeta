@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { EssentialLinkProps } from '@/types/mainTypes'
+import type { BasicLinkProps } from '@/types/mainTypes'
 
 
-withDefaults(defineProps<EssentialLinkProps>(), {
+withDefaults(defineProps<BasicLinkProps>(), {
 	title: '',
 	link: '',
 	icon: '',
@@ -13,7 +13,6 @@ withDefaults(defineProps<EssentialLinkProps>(), {
 	<q-item
 		clickable
 		tag="a"
-		target="_blank"
 		:href="link"
 	>
 		<q-item-section
