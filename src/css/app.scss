@@ -1,0 +1,21 @@
+/* Thicker outline buttons */
+.q-btn--outline-thicker {
+    &::before {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Pulse animation */
+.pulse-grey-10 {
+    animation: 1.5s pulse-grey-10 infinite ease-in-out;
+}
+
+@keyframes pulse-grey-10 {
+    0% {
+      box-shadow: 0 0 0 0 #212121;
+    }
+    //
+    100% {
+      box-shadow: 0 0 0 14px #69ffa800;
+    }
+}
