@@ -1,14 +1,12 @@
 import type { RouteRecordRaw } from 'vue-router'
-import guestRoutes from '@/router/guest-routes'
-import privateRoutes from '@/router/private-routes'
+import guestRoutes from './guest-routes'
+import privateRoutes from './private-routes'
 
-const routes: RouteRecordRaw[] = [
+export default [
 	...guestRoutes,
 	...privateRoutes,
 	{
 		path: '/:catchAll(.*)*',
 		component: () => import('pages/ErrorNotFound.vue'),
 	}
-];
-
-export default routes;
+] as RouteRecordRaw[]
