@@ -69,6 +69,10 @@ function openTradeDialog(request: TradeCardRequests) {
     showTradeDialog.value = true
     selectedTradeRequest.value = request
 }
+
+function truncateText(text: string, maxLength: number = 23): string {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
+}
 </script>
 
 <template>
@@ -256,7 +260,7 @@ function openTradeDialog(request: TradeCardRequests) {
                                     <div class="text-body2 q-mb-sm">
                                         <i class="fa-solid fa-user"></i>
 
-                                        {{ request.user.name }}
+                                        {{ truncateText(request.user.name) }}
                                     </div>
 
                                     <div class="text-body2 q-mb-sm">
