@@ -118,7 +118,7 @@ function truncateText(text: string, maxLength: number = 23): string {
                         unelevated
                         :ripple="false"
                         color="grey-9 q-px-sm"
-                        @click="router.push({ name: 'private.home' })"
+                        @click="router.push({ name: 'private.cards' })"
                     >
                         <div class="flex items-center q-gutter-sm">
                             <div class="text-center">
