@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import CardImage from '@/components/Card/CardImage.vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+
+import CardImage from '@/components/Card/CardImage.vue'
+
 import type { Card } from '@/types/cardTypes'
 import type { User, TradeCard, TradeCardRequests } from '@/types/cardsGalleryTypes'
-import { useQuasar } from 'quasar'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useTradeCardStore } from '@/stores/tradeCardStore'
 
+/* State */
 const authStore = useAuthStore()
 const tradeCardStore = useTradeCardStore()
 
 const quasar = useQuasar()
 const router = useRouter()
+
+const isLoading = ref<boolean>(false)
 const tradeCardRequests = ref<Array<TradeCardRequests>>([])
 const carouselSlides = ref<Record<string, number>>({})
-const isLoading = ref<boolean>(false)
 
 /* onMounted */
 onMounted(async () => {
@@ -35,21 +39,7 @@ async function loadTradeCards(page: number) {
                 const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
                 carouselSlides.value[tradeCardRequest.id] = 0
 
-                return {
-                    id: tradeCardRequest.id,
-                    user: {
-                        id: tradeCardRequest.userId,
-                        name: tradeCardRequest.user.name
-                    } as User,
-                    createdAt: tradeCardRequest.createdAt,
-                    tradeCards,
-                    card: {
-                        id: tradeCardRequest.id,
-                        name: tradeCardRequest.user.name,
-                        createdAt: tradeCardRequest.createdAt,
-                        tradeCards: tradeCards
-                    } as Card
-                } as TradeCardRequests
+                return generateTradeCards(tradeCardRequest, tradeCards)
             })
     }
 }
@@ -66,6 +56,8 @@ async function removeTradeCard(id: string) {
                 message: 'Solicitação de troca excluída com sucesso.',
                 icon: 'fa-solid fa-circle-check',
             })
+
+            await loadTradeCards(1)
         }
     } catch (error) {
         console.error('Erro ao adicionar cartão:', error)
@@ -77,6 +69,24 @@ async function removeTradeCard(id: string) {
         })
     } finally {
         isLoading.value = false
+    }
+}
+
+function generateTradeCards(tradeCardRequest: any, tradeCards: TradeCard[]): TradeCardRequests {
+    return {
+        id: tradeCardRequest.id,
+        user: {
+            id: tradeCardRequest.userId,
+            name: tradeCardRequest.user.name
+        } as User,
+        createdAt: tradeCardRequest.createdAt,
+        tradeCards,
+        card: {
+            id: tradeCardRequest.id,
+            name: tradeCardRequest.user.name,
+            createdAt: tradeCardRequest.createdAt,
+            tradeCards: tradeCards
+        } as Card
     }
 }
 
@@ -129,7 +139,7 @@ function presetTradeCards(tradeCard: any): TradeCard {
                     >
                         <CardImage
                             :type-list="'all'"
-                            :card="request!.card"
+                            :card="request.card"
                             :is-carousel="true"
                             :carousel-slides="carouselSlides"
                             :show-remove-button="true"
