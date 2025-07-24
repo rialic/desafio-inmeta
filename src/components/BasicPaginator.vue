@@ -30,12 +30,15 @@ async function nextPage() {
         <q-btn
             dense
             unelevated
-            icon="fa-solid fa-chevron-left"
             color="grey-9"
             size="sm"
             :disable="currentPage === 1 || isLoading"
             @click="previousPage"
-        />
+        >
+            <div class="flex items-center q-gutter-sm q-pa-sm">
+                <i class="fa-solid fa-chevron-left fa-lg"></i>
+            </div>
+        </q-btn>
 
         <div class="text-body2 text-grey-9">
             Pág. {{ currentPage }}
@@ -44,11 +47,14 @@ async function nextPage() {
         <q-btn
             dense
             unelevated
-            icon="fa-solid fa-chevron-right"
             color="grey-9"
             size="sm"
             :disable="!hasMore || isLoading"
             @click="nextPage"
-        />
+        >
+            <div class="flex items-center q-gutter-sm q-pa-sm">
+                <i class="fa-solid fa-chevron-right fa-lg"></i>
+            </div>
+        </q-btn>
     </div>
 </template>

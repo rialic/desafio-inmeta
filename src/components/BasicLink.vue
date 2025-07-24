@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { BasicLinkProps } from '@/types/mainTypes'
 
-
 withDefaults(defineProps<BasicLinkProps>(), {
 	title: '',
 	link: '',
