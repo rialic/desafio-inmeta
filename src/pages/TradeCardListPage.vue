@@ -29,18 +29,32 @@ onMounted(async () => {
 
 /* Functions */
 async function loadTradeCards(page: number) {
-    const { status, data } = await tradeCardStore.index({ page: page, rpp: 100 })
     const user = authStore.user
+    isLoading.value = true
 
-    if (status && status === 200) {
-        tradeCardRequests.value = data.list
-            .filter((tradeCardRequest: any) => tradeCardRequest.tradeCards.length && tradeCardRequest.userId === user!.id)
-            .map((tradeCardRequest: any) => {
-                const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
-                carouselSlides.value[tradeCardRequest.id] = 0
+    try {
+        const { status, data } = await tradeCardStore.index({ page: page, rpp: 100 })
 
-                return generateTradeCards(tradeCardRequest, tradeCards)
-            })
+        if (status && status === 200) {
+            tradeCardRequests.value = data.list
+                .filter((tradeCardRequest: any) => tradeCardRequest.tradeCards.length && tradeCardRequest.userId === user!.id)
+                .map((tradeCardRequest: any) => {
+                    const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
+                    carouselSlides.value[tradeCardRequest.id] = 0
+
+                    return generateTradeCards(tradeCardRequest, tradeCards)
+                })
+        }
+    } catch (error) {
+        console.error('Erro ao carregar cartões:', error)
+
+        quasar.notify({
+            color: 'negative',
+            message: `Ops... ocorreu um erro ao carregar cartões. ${String(error)}`,
+            icon: 'fa-solid fa-exclamation-circle',
+        })
+    } finally {
+        isLoading.value = false
     }
 }
 
@@ -130,6 +144,16 @@ function presetTradeCards(tradeCard: any): TradeCard {
                 flat
                 class="q-px-sm"
             >
+                <div
+                    v-if="isLoading && tradeCardRequests.length === 0"
+                    class="flex justify-center q-py-xl"
+                >
+                    <q-spinner-dots
+                        size="50px"
+                        color="grey-9"
+                    />
+                </div>
+
                 <div class="row q-col-gutter-md">
                     <div
                         class="relative-position"

@@ -17,8 +17,8 @@ const tradeCardStore = useTradeCardStore()
 const quasar = useQuasar()
 const router = useRouter()
 
-const typeList = ref<'my' | 'all'>('my')
 const isLoading = ref<boolean>(false)
+const typeList = ref<'my' | 'all'>('my')
 
 const showTradeCardRemoveDialog = ref<boolean>(false)
 const showTradeCardListDialog = ref<boolean>(false)
@@ -94,7 +94,7 @@ async function saveTradeCard() {
         if (status === 200 || status === 201) {
             quasar.notify({
                 color: 'positive',
-                message: 'Solicitação de troca realizada com sucesso',
+                message: 'Solicitação de troca criada com sucesso',
                 icon: 'fa-solid fa-circle-check',
             })
         }
@@ -209,6 +209,7 @@ function clearAll(length: number) {
                                         style="text-decoration: underline;"
                                         color="primary"
                                         class="q-ma-none"
+                                        :disable="isLoading"
                                         @click="getChoiceRemoveDialogFn(index)"
                                     >
                                         {{ getChoiceRemoveTextLink(index) }}
@@ -221,6 +222,7 @@ function clearAll(length: number) {
                                     flat
                                     color="negative"
                                     size="md"
+                                    :disable="isLoading"
                                     @click="getChoiceRemoveFn(index)"
                                 >
                                     <div class="flex items-center q-gutter-sm q-px-sm">
@@ -241,7 +243,7 @@ function clearAll(length: number) {
                         no-caps
                         unelevated
                         color="grey-9"
-                        :disable="enableTradeCardStore"
+                        :disable="enableTradeCardStore || isLoading"
                         @click="saveTradeCard"
                     >
                         <div class="flex items-center q-gutter-sm q-px-sm">

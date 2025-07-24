@@ -222,6 +222,7 @@ function closeModal() {
                     <div class="text-h6 text-grey-6 q-mb-md">
                         <i class="fa-solid fa-inbox fa-2x"></i>
                     </div>
+
                     <div class="text-body1 text-grey-6">
                         Nenhum cartão encontrado
                     </div>

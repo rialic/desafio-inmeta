@@ -1,27 +1,32 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+
 import BasicPaginator from '@/components/BasicPaginator.vue'
 import CardAddSeveralDialog from '@/components/Card/CardAddSeveralDialog.vue'
 import CardImage from '@/components/Card/CardImage.vue'
-import { useQuasar } from 'quasar'
+
+import type { StoreMethod } from 'src/types/tradeCardTypes'
 import type { Card } from '@/types/cardTypes'
 
 import { useCardsStore } from '@/stores/cardsStore'
 
+/* State */
 const cardsStore = useCardsStore()
 
 const router = useRouter()
 const quasar = useQuasar()
+
 const cards = ref<Array<Card>>([])
-
-const shownCardAddSeveralDialog = ref<boolean>(false)
-const selectedCards = ref<Array<{ id: string, name: string }>>([])
-const typeList = ref<string>('my')
-
 const currentPage = ref<number>(1)
 const hasMore = ref<boolean>(false)
 const isLoading = ref<boolean>(false)
+const selectedCards = ref<Array<{ id: string, name: string }>>([])
+const typeList = ref<string>('my')
+const typeFetch: Record<string, StoreMethod> = { my: 'myCards', all: 'index' }
+
+const shownCardAddSeveralDialog = ref<boolean>(false)
 
 /* Computed */
 const selectedCardsText = computed(() => {
@@ -48,9 +53,9 @@ watch(typeList, async (newType: string) => {
 
 /* Functions */
 async function loadCards(page: number) {
+	const method: StoreMethod = typeFetch[typeList.value]!
 	isLoading.value = true
 	cards.value = []
-	const method = typeList.value === 'all' ? 'index' : 'myCards'
 
 	try {
 		const { status, data } = await cardsStore[method]({ page, rpp: method === 'myCards' ? 100 : 10 })
@@ -77,6 +82,8 @@ async function loadCards(page: number) {
 }
 
 async function addCardToCollection(id: string | Array<string>) {
+	isLoading.value = false
+
 	try {
 		const { status } = await cardsStore.store({ cardIds: !Array.isArray(id) ? [id] : id })
 
@@ -96,9 +103,8 @@ async function addCardToCollection(id: string | Array<string>) {
 			icon: 'fa-solid fa-exclamation-circle',
 		})
 	} finally {
-		isLoading.value = false
-		shownCardAddSeveralDialog.value = false
 		selectedCards.value = []
+		shownCardAddSeveralDialog.value = false
 	}
 }
 
@@ -177,13 +183,25 @@ function openSelectedCardsDialog() {
 				<span
 					style="font-size: 12px;"
 					class="text-weight-medium text-grey-9"
-				>Clique na carta para adicionar *</span>
+				>
+					Clique na carta para adicionar *
+				</span>
 			</div>
 
 			<q-card
 				flat
 				class="q-px-sm"
 			>
+				<div
+					v-if="isLoading && cards.length === 0"
+					class="flex justify-center q-py-xl"
+				>
+					<q-spinner-dots
+						size="50px"
+						color="grey-9"
+					/>
+				</div>
+
 				<div class="row q-col-gutter-md">
 					<div
 						v-for="card in cards"

@@ -57,7 +57,17 @@ onMounted(async () => {
                 class="q-px-sm"
             >
                 <div
-                    v-if="card"
+                    v-if="!card"
+                    class="flex justify-center q-pa-xl"
+                >
+                    <q-spinner-dots
+                        size="50px"
+                        color="grey-9"
+                    />
+                </div>
+
+                <div
+                    v-else
                     class="q-pa-md"
                 >
                     <div class="flex justify-center q-mb-lg">
@@ -104,16 +114,6 @@ onMounted(async () => {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div
-                    v-else
-                    class="flex justify-center q-pa-xl"
-                >
-                    <q-spinner
-                        color="grey-10"
-                        size="3em"
-                    />
                 </div>
             </q-card>
         </q-card-section>
