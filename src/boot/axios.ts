@@ -32,15 +32,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
 	function (response: AxiosResponse): AxiosResponse {
-		const isSuccessStatus = response.status === 201 || response.status === 200
-		const isMethodDiffGet = response.config.method !== 'get'
-		const isSuccessStatusWithMessage = response.data?.message
-
-		if (isMethodDiffGet && isSuccessStatus && isSuccessStatusWithMessage) {
-			//   alertStore.value.setTypeAlert('success')
-			//   alertStore.value.setMessage(response.data.message!)
-		}
-
 		return response
 	},
 	function (error: AxiosError<ErrorData>) {
@@ -60,7 +51,7 @@ api.interceptors.response.use(
 
 			Notify.create({
 				color: 'negative',
-				message: message!,
+				message: `Ops... ocorreu um erro na solicitação. ${message}`,
 				icon: 'fa-solid fa-exclamation-circle',
 			})
 		}

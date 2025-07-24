@@ -14,12 +14,12 @@ const linksList: BasicLinkProps[] = [
 	{
 		title: 'Cartões',
 		icon: 'fa-solid fa-square-poll-horizontal',
-		link: '/home'
+		link: '/cartoes'
 	},
 	{
 		title: 'Solicitações de troca',
 		icon: 'fa-solid fa-arrow-right-arrow-left',
-		link: 'https://quasar.dev'
+		link: '/solicitacoes-de-troca'
 	},
 	{
 		title: 'Perfil',

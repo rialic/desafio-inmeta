@@ -2,22 +2,33 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export default [
     {
-        path: '/home',
-        name: 'private.home',
+        path: '/',
         component: () => import('layouts/MainLayout.vue'),
         meta: { requiresAuth: true },
         children: [
             {
-                path: '',
+                path: 'cartoes',
                 name: 'private.cards',
                 component: () => import('pages/CardListPage.vue'),
                 meta: { requiresAuth: true }
             },
             {
-                path: 'cartao/:id',
+                path: 'cartoes/:id',
                 name: 'private.cards-form',
-                component: () => import('src/pages/CardFormPage.vue'),
+                component: () => import('pages/CardFormPage.vue'),
                 props: (route) => ({ id: route.params.id }),
+                meta: { requiresAuth: true }
+            },
+            {
+                path: 'solicitacoes-de-troca',
+                name: 'private.trade-cards',
+                component: () => import('pages/TradeCardListPage.vue'),
+                meta: { requiresAuth: true }
+            },
+            {
+                path: 'solicitacoes-de-troca/novo',
+                name: 'private.trade-cards-form',
+                component: () => import('pages/TradeCardFormPage.vue'),
                 meta: { requiresAuth: true }
             }
         ]

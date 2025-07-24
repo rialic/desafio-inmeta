@@ -14,6 +14,7 @@ withDefaults(defineProps<BasicLinkProps>(), {
 		clickable
 		tag="a"
 		:href="link"
+		class="text-weight-medium"
 	>
 		<q-item-section
 			v-if="icon"

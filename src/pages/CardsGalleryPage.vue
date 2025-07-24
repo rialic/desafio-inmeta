@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { format, parseISO } from 'date-fns'
+import CardImage from '@/components/Card/CardImage.vue'
+import type { Card } from '@/types/cardTypes'
 import type { User, TradeCard, TradeCardRequests } from '@/types/cardsGalleryTypes'
 
 import { useAuthStore } from '@/stores/authStore'
-import { useTradeStore } from '@/stores/tradeStore'
+import { useTradeCardStore } from '@/stores/tradeCardStore'
 
-const tradeStore = useTradeStore()
+const tradeStore = useTradeCardStore()
 const authStore = useAuthStore()
 
 const router = useRouter()
 const tradeCardRequests = ref<Array<TradeCardRequests>>([])
 const carouselSlides = ref<Record<string, number>>({})
-const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando']])
-const showTradeDialog = ref<boolean>(false)
-const selectedTradeRequest = ref<TradeCardRequests | null>(null)
 
 /* onMounted */
 onMounted(async () => {
-    const { status, data } = await tradeStore.index({ page: 1, rpp: 10 })
+    const { status, data } = await tradeStore.index({ page: 1, rpp: 100 })
 
     if (status && status === 200) {
         tradeCardRequests.value = data.list
@@ -35,7 +33,13 @@ onMounted(async () => {
                         name: tradeCardRequest.user.name
                     } as User,
                     createdAt: tradeCardRequest.createdAt,
-                    tradeCards
+                    tradeCards,
+                    card: {
+                        id: tradeCardRequest.id,
+                        name: tradeCardRequest.user.name,
+                        createdAt: tradeCardRequest.createdAt,
+                        tradeCards: tradeCards
+                    } as Card
                 } as TradeCardRequests
             })
     }
@@ -47,31 +51,6 @@ function presetTradeCards(tradeCard: any): TradeCard {
     const { createdAt, ...rest } = tradeCard.card
 
     return { ...rest, type: tradeCard.type }
-}
-
-function getToggleOptions(tradeCards: TradeCard[]) {
-    const options = []
-    const offeringIndex = tradeCards.findIndex(card => card.type === 'OFFERING')
-    const receivingIndex = tradeCards.findIndex(card => card.type === 'RECEIVING')
-
-    if (offeringIndex !== -1) {
-        options.push({ label: String(tradeTypes.get('OFFERING')), value: offeringIndex })
-    }
-
-    if (receivingIndex !== -1) {
-        options.push({ label: String(tradeTypes.get('RECEIVING')), value: receivingIndex })
-    }
-
-    return options
-}
-
-function openTradeDialog(request: TradeCardRequests) {
-    showTradeDialog.value = true
-    selectedTradeRequest.value = request
-}
-
-function truncateText(text: string, maxLength: number = 23): string {
-    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
 }
 </script>
 
@@ -203,171 +182,17 @@ function truncateText(text: string, maxLength: number = 23): string {
                             v-for="request in tradeCardRequests"
                             :key="request.id"
                         >
-                            <q-card
-                                flat
-                                bordered
-                            >
-                                <div class="q-px-md">
-                                    <q-carousel
-                                        v-model="carouselSlides[request.id]"
-                                        animated
-                                        transition-prev="slide-right"
-                                        transition-next="slide-left"
-                                        control-color="grey-10"
-                                        padding
-                                        height="300px"
-                                        class="bg-grey-1"
-                                    >
-                                        <q-carousel-slide
-                                            v-for="(card, index) in request.tradeCards"
-                                            :key="card.id"
-                                            :name="index"
-                                            class="q-pa-none"
-                                        >
-                                            <div class="relative-position full-width full-height">
-                                                <q-img
-                                                    :src="card.imageUrl"
-                                                    fit="contain"
-                                                    class="full-width full-height"
-                                                />
-                                                <div
-                                                    class="absolute-top-right q-pa-sm"
-                                                    :class="card.type === 'OFFERING' ? 'bg-green-8' : 'bg-blue-8'"
-                                                    style="opacity: 0.9; border-bottom-left-radius: 4px;"
-                                                >
-                                                    <span class="text-white text-weight-medium text-caption">
-                                                        {{ tradeTypes.get(card.type) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </q-carousel-slide>
-                                    </q-carousel>
 
-                                    <div class="row justify-center q-mt-sm">
-                                        <q-btn-toggle
-                                            v-model="carouselSlides[request.id]"
-                                            no-caps
-                                            unelevated
-                                            toggle-color="grey-10"
-                                            color="white"
-                                            text-color="grey-10"
-                                            :options="getToggleOptions(request.tradeCards)"
-                                        />
-                                    </div>
-                                </div>
-
-                                <q-card-section class="text-center">
-                                    <div class="text-body2 q-mb-sm">
-                                        <i class="fa-solid fa-user"></i>
-
-                                        {{ truncateText(request.user.name) }}
-                                    </div>
-
-                                    <div class="text-body2 q-mb-sm">
-                                        <i class="fa-solid fa-clock"></i>
-
-                                        {{ format(parseISO(request.createdAt.slice(0, -1)), 'dd/MM/yyyy HH:mm') }}
-                                    </div>
-
-                                    <q-btn
-                                        label="Visualizar"
-                                        color="grey-10"
-                                        class="full-width"
-                                        style="max-width: 200px;"
-                                        size="sm"
-                                        unelevated
-                                        @click="openTradeDialog(request)"
-                                    />
-                                </q-card-section>
-                            </q-card>
+                            <CardImage
+                                :card="request!.card"
+                                :is-carousel="true"
+                                :carousel-slides="carouselSlides"
+                                :type-list="'all'"
+                            />
                         </div>
                     </div>
                 </q-card>
             </q-card-section>
         </q-card>
-
-        <q-dialog
-            v-model="showTradeDialog"
-            persistent
-        >
-            <q-card style="min-width: 350px; max-width: 800px;">
-                <q-card-section class="flex justify-between q-py-sm">
-                    <div class="text-h6 text-grey-9">Troca de cartões</div>
-
-                    <q-btn
-                        icon="fa-solid fa-xmark"
-                        flat
-                        round
-                        dense
-                        size="sm"
-                        color="grey-9"
-                        v-close-popup
-                    />
-                </q-card-section>
-
-                <q-card-section class="q-pb-sm q-pt-none">
-                    <div class="text-subtitle2 text-grey-7">
-                        Solicitação de troca de {{ selectedTradeRequest?.user.name }}
-                    </div>
-                </q-card-section>
-
-                <q-separator />
-
-                <q-card-section class="q-pa-md">
-                    <div class="row q-col-gutter-lg justify-center">
-                        <div
-                            v-for="card in selectedTradeRequest?.tradeCards"
-                            :key="card.id"
-                            class="col-12 col-sm-6"
-                        >
-                            <div class="flex column items-center q-gutter-sm">
-                                <div class="relative-position">
-                                    <q-img
-                                        :src="card.imageUrl"
-                                        :ratio="1"
-                                        style="width: 250px; min-height: 350px; border-radius: 8px;"
-                                        class="shadow-2"
-                                    />
-
-                                    <q-chip
-                                        :color="card.type === 'OFFERING' ? 'green-8' : 'blue-8'"
-                                        text-color="white"
-                                        class="absolute-top-right"
-                                        style="margin: 8px;"
-                                    >
-                                        {{ tradeTypes.get(card.type) }}
-                                    </q-chip>
-                                </div>
-
-                                <div
-                                    class="flex column text-center"
-                                    style="max-width: 250px;"
-                                >
-                                    <div class="text-subtitle1 text-weight-medium">
-                                        {{ card.name }}
-                                    </div>
-                                    <div class="text-body2 text-grey-7 q-mt-xs">
-                                        {{ card.description }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </q-card-section>
-
-                <q-separator />
-
-                <q-card-actions align="right">
-                    <q-btn
-                        no-caps
-                        dense
-                        label="Fechar"
-                        color="grey-9"
-                        unelevated
-                        v-close-popup
-                    />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
     </div>
 </template>

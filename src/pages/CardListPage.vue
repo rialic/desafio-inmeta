@@ -53,7 +53,7 @@ async function loadCards(page: number) {
 	const method = typeList.value === 'all' ? 'index' : 'myCards'
 
 	try {
-		const { status, data } = await cardsStore[method]({ page, rpp: 10 })
+		const { status, data } = await cardsStore[method]({ page, rpp: method === 'myCards' ? 100 : 10 })
 
 		if (status === 200 && data) {
 			cards.value = data.list || data as Card[]
@@ -170,16 +170,26 @@ function openSelectedCardsDialog() {
 				/>
 			</div>
 
+			<div
+				v-if="cards?.length && typeList === 'all'"
+				class="flex justify-start q-px-sm q-mb-md"
+			>
+				<span
+					style="font-size: 12px;"
+					class="text-weight-medium text-grey-9"
+				>Clique na carta para adicionar *</span>
+			</div>
+
 			<q-card
 				flat
 				class="q-px-sm"
 			>
 				<div class="row q-col-gutter-md">
 					<div
-						:class="[cards.length > 4 ? 'col-12 col-sm-6 col-md-4 col-lg-3' : 'col']"
 						v-for="card in cards"
 						:key="card.id"
 						class="relative-position"
+						:class="[cards.length > 4 ? 'col-12 col-sm-6 col-md-4 col-lg-3' : 'col']"
 					>
 						<div
 							v-if="typeList === 'all' && isCardSelected(card.id)"

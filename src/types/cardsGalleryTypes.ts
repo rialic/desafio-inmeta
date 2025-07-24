@@ -1,3 +1,5 @@
+import type { Card } from "./cardTypes"
+
 export type User = {
     id: string,
     name: string
@@ -15,5 +17,6 @@ export type TradeCardRequests = {
     id: string
     user: User
     createdAt: string
+    card?: Card
     tradeCards: TradeCard[]
 }
