@@ -1,15 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 const props = defineProps<{
-    isLoading: boolean
     id: string
     removeFn(selectedCard: string): Promise<void>
 }>()
 
+/* State */
 const shownCardRemoveDialog = defineModel<boolean>({ default: false })
+
+const isLoading = ref<boolean>(false)
 
 /* Function */
 async function removeCard() {
+    isLoading.value = true
+
     await props.removeFn(props.id)
+
+    isLoading.value = false
     shownCardRemoveDialog.value = false
 }
 </script>
@@ -56,7 +64,7 @@ async function removeCard() {
                     dense
                     color="grey-9"
                     unelevated
-                    :disable="props.isLoading"
+                    :disable="isLoading"
                     @click="removeCard"
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">
@@ -75,7 +83,7 @@ async function removeCard() {
                     dense
                     color="grey-9"
                     unelevated
-                    :disable="props.isLoading"
+                    :disable="isLoading"
                     v-close-popup
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">

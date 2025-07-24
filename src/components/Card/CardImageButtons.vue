@@ -21,7 +21,6 @@ const props = withDefaults(defineProps<{
 })
 
 const router = useRouter()
-const isLoading = ref<boolean>(false)
 const shownCardInfoDialog = ref<boolean>(false)
 const shownCardAddDialog = ref<boolean>(false)
 const showTradeCardViewDialog = ref<boolean>(false)
@@ -152,7 +151,6 @@ function openRemoveDialog(card: Card) {
         v-model="shownCardAddDialog"
         :selected-card="selectedCard"
         :add-fn="addCardToCollection!"
-        :is-loading="isLoading"
     />
 
     <TradeCardViewDialog
@@ -164,6 +162,5 @@ function openRemoveDialog(card: Card) {
         v-model="showRemoveCardDialog"
         :id="selectedId!"
         :remove-fn="removeFn!"
-        :is-loading="isLoading"
     />
 </template>

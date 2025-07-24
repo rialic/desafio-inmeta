@@ -253,7 +253,6 @@ function openSelectedCardsDialog() {
 		v-model="shownCardAddSeveralDialog"
 		:selected-cards="selectedCards"
 		:add-fn="addCardToCollection"
-		:is-loading="isLoading"
 		@remove-card="(index) => selectedCards.splice(index, 1)"
 	/>
 </template>

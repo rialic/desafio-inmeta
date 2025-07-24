@@ -1,17 +1,25 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 import type { Card } from '@/types/cardTypes'
 
 const props = defineProps<{
-    isLoading: boolean
     selectedCard: Card | null
     addFn(selectedCard: string | Array<string>): Promise<void>
 }>()
 
+/* State */
 const shownCardAddDialog = defineModel<boolean>({ default: false })
+
+const isLoading = ref<boolean>(false)
 
 /* Function */
 async function addCardToCollection() {
+    isLoading.value = true
+
     await props.addFn(props.selectedCard!.id)
+
+    isLoading.value = false
     shownCardAddDialog.value = false
 }
 </script>
@@ -58,7 +66,7 @@ async function addCardToCollection() {
                     dense
                     color="grey-9"
                     unelevated
-                    :disable="props.isLoading"
+                    :disable="isLoading"
                     @click="addCardToCollection"
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">
@@ -77,7 +85,7 @@ async function addCardToCollection() {
                     dense
                     color="grey-9"
                     unelevated
-                    :disable="props.isLoading"
+                    :disable="isLoading"
                     v-close-popup
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">

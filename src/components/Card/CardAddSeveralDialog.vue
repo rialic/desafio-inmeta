@@ -1,16 +1,29 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 
 const props = defineProps<{
-    isLoading: boolean
     selectedCards: Array<{ id: string, name: string }>
-    addFn(selectedCard: string | Array<string>): void
+    addFn(selectedCard: string | Array<string>): Promise<void>
 }>()
 
 const emit = defineEmits<{
     (e: 'removeCard', value: number): void
 }>()
 
+/* State */
 const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
+
+const isLoading = ref<boolean>(false)
+
+/* Function */
+async function addCardsToCollection() {
+    isLoading.value = true
+
+    await props.addFn(props.selectedCards.map(card => card.id))
+
+    isLoading.value = false
+    shownCardAddSeveralDialog.value = false
+}
 </script>
 
 <template>
@@ -67,6 +80,7 @@ const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
                                 dense
                                 size="sm"
                                 color="negative"
+                                :disable="isLoading"
                                 @click="emit('removeCard', index)"
                             />
                         </div>
@@ -83,7 +97,7 @@ const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
                     color="grey-9"
                     unelevated
                     :disable="isLoading || props.selectedCards.length === 0"
-                    @click="props.addFn(props.selectedCards.map(card => card.id))"
+                    @click="addCardsToCollection"
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">
                         <div class="text-center">

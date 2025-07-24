@@ -5,6 +5,7 @@ const props = defineProps<{
     selectedCard: Card | null
 }>()
 
+/* State */
 const shownCardInfoDialog = defineModel<boolean>({ default: false })
 </script>
 
