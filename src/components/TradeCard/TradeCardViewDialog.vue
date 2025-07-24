@@ -5,7 +5,9 @@ const props = defineProps<{
     selectedCard: Card
 }>()
 
+/* State */
 const showTradeCardDialog = defineModel<boolean>({ default: false })
+
 const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando']])
 </script>
 
@@ -70,6 +72,7 @@ const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando
                                 <div class="text-subtitle1 text-weight-medium">
                                     {{ card.name }}
                                 </div>
+
                                 <div class="text-body2 text-grey-7 q-mt-xs">
                                     {{ card.description }}
                                 </div>

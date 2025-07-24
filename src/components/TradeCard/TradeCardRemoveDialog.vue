@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const props = defineProps<{
     selectedCards: Array<{ id: string, name: string }>
 }>()
@@ -9,6 +8,7 @@ const emit = defineEmits<{
     (e: 'clearAll', value: number): void
 }>()
 
+/* State */
 const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
 </script>
 
@@ -48,6 +48,7 @@ const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
                     >
                         Nenhum cartão selecionado
                     </div>
+
                     <div v-else>
                         <div
                             v-for="(card, index) in selectedCards"
@@ -56,6 +57,7 @@ const shownCardAddSeveralDialog = defineModel<boolean>({ default: false })
                         >
                             <div class="flex column">
                                 <div class="text-body1 text-weight-medium">{{ card.name }}</div>
+
                                 <div class="text-body2 text-grey-7">ID: {{ card.id }}</div>
                             </div>
 

@@ -2,15 +2,14 @@
 import { onUpdated, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+
 import BasicPaginator from '@/components/BasicPaginator.vue'
 import CardImage from '@/components/Card/CardImage.vue'
+
+import type { StoreMethod } from '@/types/tradeCardTypes'
 import type { Card } from '@/types/cardTypes'
 
-
 import { useCardsStore } from '@/stores/cardsStore'
-
-const cardsStore = useCardsStore()
-const quasar = useQuasar()
 
 const props = defineProps<{
     typeList: 'my' | 'all'
@@ -20,16 +19,20 @@ const emit = defineEmits<{
     (e: 'addCards', cards: Array<Card>): void
 }>()
 
-type StoreMethod = 'myCards' | 'index'
+/* State */
+const cardsStore = useCardsStore()
+
+const showAllCardsDialog = defineModel<boolean>({ default: false })
+
 const router = useRouter()
+const quasar = useQuasar()
+
+const isLoading = ref<boolean>(false)
+const hasMore = ref<boolean>(false)
 const cards = ref<Array<Card>>([])
 const selectedCards = ref<Array<{ id: string, name: string }>>([])
 const currentPage = ref<number>(1)
-const hasMore = ref<boolean>(false)
-const isLoading = ref<boolean>(false)
 const typeFetch: Record<string, StoreMethod> = { my: 'myCards', all: 'index' }
-
-const showAllCardsDialog = defineModel<boolean>({ default: false })
 
 /* onUpdated */
 onUpdated(async () => {
@@ -40,9 +43,9 @@ onUpdated(async () => {
 
 /* Functions */
 async function loadCards(page: number) {
-    isLoading.value = true
-    cards.value = []
     const method: StoreMethod = typeFetch[props.typeList]!
+    cards.value = []
+    isLoading.value = true
 
     try {
         const { status, data } = await cardsStore[method]({ page, rpp: method === 'myCards' ? 100 : 12 })
