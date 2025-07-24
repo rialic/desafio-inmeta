@@ -1,51 +1,76 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+
 import CardImage from '@/components/Card/CardImage.vue'
+
 import type { Card } from '@/types/cardTypes'
-import type { User, TradeCard, TradeCardRequests } from '@/types/cardsGalleryTypes'
+import type { User, TradeCard, TradeCardRequests } from '@/types/tradeCardGalleryTypes'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useTradeCardStore } from '@/stores/tradeCardStore'
 
-const tradeStore = useTradeCardStore()
+/* State */
 const authStore = useAuthStore()
+const tradeStore = useTradeCardStore()
 
+const quasar = useQuasar()
 const router = useRouter()
+
+const isLoading = ref<boolean>()
 const tradeCardRequests = ref<Array<TradeCardRequests>>([])
 const carouselSlides = ref<Record<string, number>>({})
 
 /* onMounted */
 onMounted(async () => {
-    const { status, data } = await tradeStore.index({ page: 1, rpp: 100 })
-
-    if (status && status === 200) {
-        tradeCardRequests.value = data.list
-            .filter((tradeCardRequest: any) => tradeCardRequest.tradeCards.length)
-            .map((tradeCardRequest: any) => {
-                const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
-                carouselSlides.value[tradeCardRequest.id] = 0
-
-                return {
-                    id: tradeCardRequest.id,
-                    user: {
-                        id: tradeCardRequest.userId,
-                        name: tradeCardRequest.user.name
-                    } as User,
-                    createdAt: tradeCardRequest.createdAt,
-                    tradeCards,
-                    card: {
-                        id: tradeCardRequest.id,
-                        name: tradeCardRequest.user.name,
-                        createdAt: tradeCardRequest.createdAt,
-                        tradeCards: tradeCards
-                    } as Card
-                } as TradeCardRequests
-            })
-    }
+    await loadTradeCards(1)
 })
 
 /* Functions */
+async function loadTradeCards(page: number) {
+    isLoading.value = true
+
+    try {
+        const { status, data } = await tradeStore.index({ page, rpp: 100 })
+
+        if (status && status === 200) {
+            tradeCardRequests.value = data.list
+                .filter((tradeCardRequest: any) => tradeCardRequest.tradeCards.length)
+                .map((tradeCardRequest: any) => {
+                    const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
+                    carouselSlides.value[tradeCardRequest.id] = 0
+
+                    return {
+                        id: tradeCardRequest.id,
+                        user: {
+                            id: tradeCardRequest.userId,
+                            name: tradeCardRequest.user.name
+                        } as User,
+                        createdAt: tradeCardRequest.createdAt,
+                        tradeCards,
+                        card: {
+                            id: tradeCardRequest.id,
+                            name: tradeCardRequest.user.name,
+                            createdAt: tradeCardRequest.createdAt,
+                            tradeCards: tradeCards
+                        } as Card
+                    } as TradeCardRequests
+                })
+        }
+    } catch (error) {
+        console.error('Erro ao carregar cartões:', error)
+
+        quasar.notify({
+            color: 'negative',
+            message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
+            icon: 'fa-solid fa-exclamation-circle',
+        })
+    } finally {
+        isLoading.value = false
+    }
+}
+
 function presetTradeCards(tradeCard: any): TradeCard {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { createdAt, ...rest } = tradeCard.card
@@ -176,7 +201,20 @@ function presetTradeCards(tradeCard: any): TradeCard {
                     class="q-pa-sm"
                     style="width: 100%; max-width: 1200px;"
                 >
-                    <div class="row q-col-gutter-md">
+                    <div
+                        v-if="isLoading && tradeCardRequests.length === 0"
+                        class="flex justify-center q-py-xl"
+                    >
+                        <q-spinner-dots
+                            size="50px"
+                            color="grey-9"
+                        />
+                    </div>
+
+                    <div
+                        v-else
+                        class="row q-col-gutter-md"
+                    >
                         <div
                             class="col-12 col-sm-6 col-md-3"
                             v-for="request in tradeCardRequests"

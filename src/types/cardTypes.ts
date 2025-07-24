@@ -1,4 +1,4 @@
-import type { TradeCard } from "./cardsGalleryTypes"
+import type { TradeCard } from "./tradeCardGalleryTypes"
 
 export type Card = {
     id: string

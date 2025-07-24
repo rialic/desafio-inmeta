@@ -73,7 +73,7 @@ async function loadCards(page: number) {
 
 		quasar.notify({
 			color: 'negative',
-			message: `Ops... ocorreu um erro ao carregar cartões. ${String(error)}`,
+			message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
 			icon: 'fa-solid fa-exclamation-circle',
 		})
 	} finally {

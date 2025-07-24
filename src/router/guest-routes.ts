@@ -1,12 +1,12 @@
 import type { RouteRecordRaw } from 'vue-router'
-import CardsGalleryPage from '@/pages/CardsGalleryPage.vue'
+import TradeCardGalleryPage from '@/pages/TradeCardGalleryPage.vue'
 import AuthPage from '@/pages/AuthPage.vue'
 
 export default [
     {
         path: '/',
         name: 'guest.cards',
-        component: CardsGalleryPage
+        component: TradeCardGalleryPage
     },
     {
         path: '/login',

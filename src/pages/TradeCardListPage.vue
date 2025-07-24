@@ -6,7 +6,7 @@ import { useQuasar } from 'quasar'
 import CardImage from '@/components/Card/CardImage.vue'
 
 import type { Card } from '@/types/cardTypes'
-import type { User, TradeCard, TradeCardRequests } from '@/types/cardsGalleryTypes'
+import type { User, TradeCard, TradeCardRequests } from '@/types/tradeCardGalleryTypes'
 
 import { useAuthStore } from '@/stores/authStore'
 import { useTradeCardStore } from '@/stores/tradeCardStore'
@@ -50,7 +50,7 @@ async function loadTradeCards(page: number) {
 
         quasar.notify({
             color: 'negative',
-            message: `Ops... ocorreu um erro ao carregar cartões. ${String(error)}`,
+            message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
             icon: 'fa-solid fa-exclamation-circle',
         })
     } finally {
