@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { notifyError } from '@/helpers'
+
 import type { Card } from '@/types/cardTypes'
 
 import { useCardsStore } from '@/stores/cardsStore'
 
-const cardsStore = useCardsStore()
-
 const props = defineProps<{
     id: string
 }>()
+
+/* State */
+const cardsStore = useCardsStore()
 
 const router = useRouter()
 const card = ref<Card>()
@@ -25,6 +28,7 @@ onMounted(async () => {
             }
         } catch (error) {
             console.error('Erro ao carregar cartão:', error)
+            notifyError(`Erro ao carregar cartão ${String(error)}`)
         }
     }
 })
