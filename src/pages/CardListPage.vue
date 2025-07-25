@@ -210,7 +210,7 @@ function openSelectedCardsDialog() {
 						:class="[cards.length > 4 ? 'col-12 col-sm-6 col-md-4 col-lg-3' : 'col']"
 					>
 						<div
-							v-if="typeList === 'all' && isCardSelected(card.id)"
+							v-if="isCardSelected(card.id)"
 							class="absolute-top-right"
 							style="z-index: 1; right: -10px;"
 						>
@@ -224,10 +224,11 @@ function openSelectedCardsDialog() {
 
 						<CardImage
 							:card="card"
-							:type-list="typeList"
+							:is-clickable="typeList === 'all'"
 							:selected-cards="selectedCards"
+							:show-add-button="typeList === 'all'"
 							:is-card-selected="isCardSelected"
-							:add-card-to-collection="addCardToCollection"
+							:add-fn="addCardToCollection"
 							@add-card="(card) => selectedCards.push(card)"
 							@remove-card="(index) => selectedCards.splice(index, 1)"
 						/>

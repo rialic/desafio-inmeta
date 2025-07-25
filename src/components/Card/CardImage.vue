@@ -1,26 +1,33 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { format, parseISO } from 'date-fns'
-import CardImageButtons from '@/components/Card/CardImageButtons.vue'
+
+import CardImageCtaButtons from '@/components/Card/CardImageCtaButtons.vue'
+
 import type { Card } from '@/types/cardTypes'
 
 const props = withDefaults(defineProps<{
     card: Card | undefined
     isCarousel?: boolean
+    isTradeCard?: boolean
     carouselSlides?: Record<string, number>
-    typeList: string
+    isClickable?: boolean
     selectedCards?: Array<{ id: string, name: string }>
+    showViewButton?: boolean
+    showAddButton?: boolean
     showRemoveButton?: boolean
-    hideEssentialButtons?: boolean
     isCardSelected?(cardId: string): boolean
-    addCardToCollection?(id: string | Array<string>): Promise<void>
+    addFn?(id: string | Array<string>): Promise<void>
     removeFn?(id: string): Promise<void>
 }>(), {
     isCarousel: false,
-    hideEssentialButtons: false,
+    isClickable: false,
+    isTradeCard: false,
+    showViewButton: true,
+    showAddButton: false,
     showRemoveButton: false,
     isCardSelected: () => false,
-    addCardToCollection: async () => { },
+    addFn: async () => { },
     removeFn: async () => { }
 })
 
@@ -29,7 +36,7 @@ const emit = defineEmits<{
     (e: 'removeCard', value: number): void
 }>()
 
-
+/* State */
 const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando']])
 
 /* Computed */
@@ -41,15 +48,15 @@ const toggleCardSelectionStyle = computed(() => {
 
 /* Functions */
 function toggleCardSelection(card: Card) {
-    if (props.typeList !== 'all' || props.isCarousel) return
+    if (props.isCarousel) return
 
     const existingIndex = props.selectedCards!.findIndex(item => item.id === card.id)
 
     if (existingIndex > -1) {
         return emit('removeCard', existingIndex)
-    } else {
-        return emit('addCard', { id: card.id, name: card.name })
     }
+
+    return emit('addCard', { id: card.id, name: card.name })
 }
 
 function truncateText(text: string, maxLength: number = 23): string {
@@ -65,8 +72,8 @@ function truncateText(text: string, maxLength: number = 23): string {
     >
         <div
             class="q-py-sm q-px-md"
-            :class="{ 'cursor-pointer': props.typeList === 'all' && !props.isCarousel }"
-            @click="props.typeList === 'all' ? toggleCardSelection(card as Card) : undefined"
+            :class="{ 'cursor-pointer': props.isClickable && !props.isCarousel }"
+            @click="props.isClickable ? toggleCardSelection(card as Card) : undefined"
         >
             <div
                 class="relative-position"
@@ -75,20 +82,20 @@ function truncateText(text: string, maxLength: number = 23): string {
                 <template v-if="props.isCarousel">
                     <q-carousel
                         v-model="props.carouselSlides![props.card!.id]"
+                        :control-type="'unelevated'"
                         arrows
                         :padding="false"
-                        control-color="grey-10"
+                        control-color="grey-9"
                         height="300px"
-                        class="bg-grey-1"
                     >
                         <q-carousel-slide
-                            v-for="(crd, index) in props.card!.tradeCards"
-                            :key="crd.id"
+                            v-for="(card, index) in props.card!.tradeCards"
+                            :key="card.id"
                             :name="index"
                             class="q-pa-none"
                         >
                             <q-img
-                                :src="crd.imageUrl"
+                                :src="card.imageUrl"
                                 fit="contain"
                                 class="full-width full-height bg-grey-1 rounded-borders"
                             >
@@ -99,11 +106,11 @@ function truncateText(text: string, maxLength: number = 23): string {
 
                             <div
                                 class="absolute-top-right q-pa-sm rounded-borders"
-                                :class="crd.type === 'OFFERING' ? 'bg-green-8' : 'bg-blue-8'"
+                                :class="card.type === 'OFFERING' ? 'bg-green-8' : 'bg-blue-8'"
                                 style="opacity: .8;"
                             >
                                 <span class="text-white text-weight-medium text-caption">
-                                    {{ tradeTypes.get(crd.type) }}
+                                    {{ tradeTypes.get(card.type) }}
                                 </span>
                             </div>
                         </q-carousel-slide>
@@ -123,24 +130,26 @@ function truncateText(text: string, maxLength: number = 23): string {
             </div>
         </div>
 
-        <q-card-section class="text-center">
+        <q-card-section class="text-center q-pt-none">
             <div class="text-body2 q-mb-sm">
                 <i class="fa-solid fa-user"></i>
+
                 {{ truncateText(props.card!.name) }}
             </div>
 
             <div class="text-body2 q-mb-sm">
                 Criado em:
+
                 {{ format(parseISO(props.card!.createdAt.slice(0, -1)), 'dd/MM/yyyy HH:mm') }}
             </div>
 
-            <CardImageButtons
+            <CardImageCtaButtons
                 :card="props.card"
-                :type-list="props.typeList"
-                :is-carousel="props.isCarousel"
-                :hide-essential-buttons="props.hideEssentialButtons"
+                :is-trade-card="props.isTradeCard"
+                :show-view-button="props.showViewButton"
+                :show-add-button="props.showAddButton"
                 :show-remove-button="props.showRemoveButton"
-                :add-card-to-collection="props.addCardToCollection!"
+                :add-fn="props.addFn!"
                 :remove-fn="props.removeFn!"
             />
         </q-card-section>

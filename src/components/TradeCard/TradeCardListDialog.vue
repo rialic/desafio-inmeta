@@ -251,10 +251,10 @@ function closeModal() {
 
                             <CardImage
                                 :card="card"
-                                type-list="all"
-                                :selected-cards="selectedCards"
                                 :is-card-selected="isCardSelected"
-                                :hide-essential-buttons="true"
+                                :is-clickable="true"
+                                :selected-cards="selectedCards"
+                                :show-view-button="false"
                                 @add-card="addCard"
                                 @remove-card="removeCard"
                             />

@@ -1,40 +1,36 @@
 <script setup lang="ts">
+import type { CtaData } from '@/types/ctaDialogTypes';
 import { ref } from 'vue'
 
-import type { Card } from '@/types/cardTypes'
-
-const props = defineProps<{
-    selectedCard: Card | null
-    addFn(selectedCard: string | Array<string>): Promise<void>
-}>()
+const props = defineProps<CtaData>()
 
 /* State */
-const shownCardAddDialog = defineModel<boolean>({ default: false })
+const showCallToActionDialog = defineModel<boolean>({ default: false })
 
 const isLoading = ref<boolean>(false)
 
 /* Function */
-async function addCardToCollection() {
+async function callToAction() {
     isLoading.value = true
 
-    await props.addFn(props.selectedCard!.id)
+    await props.ctaFn(props.id)
 
     isLoading.value = false
-    shownCardAddDialog.value = false
+    showCallToActionDialog.value = false
 }
 </script>
 
 <template>
     <q-dialog
-        v-model="shownCardAddDialog"
+        v-model="showCallToActionDialog"
         persistent
     >
         <q-card style="min-width: 500px;">
             <q-card-section class="flex justify-between q-py-sm">
                 <div class="flex column">
-                    <div class="text-h6 text-grey-9">Adicionar à coleção?</div>
+                    <div class="text-h6 text-grey-9">{{ props.title }}</div>
 
-                    <div class="text-body2 text-grey-8">Id: {{ props.selectedCard!.id }}</div>
+                    <div class="text-body2 text-grey-8">Id: {{ props.id }}</div>
                 </div>
 
                 <q-btn
@@ -53,7 +49,7 @@ async function addCardToCollection() {
             <q-card-section class="q-pa-md">
                 <div class="flex justify-center">
                     <span class="text-body2">
-                        Deseja adicionar o cartão <strong>{{ props.selectedCard!.name }}</strong> a sua coleção?
+                        {{ message }}
                     </span>
                 </div>
             </q-card-section>
@@ -67,16 +63,16 @@ async function addCardToCollection() {
                     color="grey-9"
                     unelevated
                     :disable="isLoading"
-                    @click="addCardToCollection"
+                    @click="callToAction"
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">
+                        <i class="fa-solid fa-check fa-md" />
+
                         <div class="text-center">
                             <span class="text-weight-medium">
                                 Sim
                             </span>
                         </div>
-
-                        <i class="fa-solid fa-check fa-md" />
                     </div>
                 </q-btn>
 
@@ -89,13 +85,13 @@ async function addCardToCollection() {
                     v-close-popup
                 >
                     <div class="flex items-center q-gutter-sm q-px-sm">
+                        <i class="fa-solid fa-xmark fa-md" />
+
                         <div class="text-center">
                             <span class="text-weight-medium">
                                 Não
                             </span>
                         </div>
-
-                        <i class="fa-solid fa-xmark fa-md" />
                     </div>
                 </q-btn>
             </q-card-actions>

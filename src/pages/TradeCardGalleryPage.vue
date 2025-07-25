@@ -41,21 +41,7 @@ async function loadTradeCards(page: number) {
                     const tradeCards: TradeCard[] = tradeCardRequest.tradeCards.map((tradeCard: any) => presetTradeCards(tradeCard))
                     carouselSlides.value[tradeCardRequest.id] = 0
 
-                    return {
-                        id: tradeCardRequest.id,
-                        user: {
-                            id: tradeCardRequest.userId,
-                            name: tradeCardRequest.user.name
-                        } as User,
-                        createdAt: tradeCardRequest.createdAt,
-                        tradeCards,
-                        card: {
-                            id: tradeCardRequest.id,
-                            name: tradeCardRequest.user.name,
-                            createdAt: tradeCardRequest.createdAt,
-                            tradeCards: tradeCards
-                        } as Card
-                    } as TradeCardRequests
+                    return generateTradeCards(tradeCardRequest, tradeCards)
                 })
         }
     } catch (error) {
@@ -76,6 +62,24 @@ function presetTradeCards(tradeCard: any): TradeCard {
     const { createdAt, ...rest } = tradeCard.card
 
     return { ...rest, type: tradeCard.type }
+}
+
+function generateTradeCards(tradeCardRequest: any, tradeCards: TradeCard[]): TradeCardRequests {
+    return {
+        id: tradeCardRequest.id,
+        user: {
+            id: tradeCardRequest.userId,
+            name: tradeCardRequest.user.name
+        } as User,
+        createdAt: tradeCardRequest.createdAt,
+        tradeCards,
+        card: {
+            id: tradeCardRequest.id,
+            name: tradeCardRequest.user.name,
+            createdAt: tradeCardRequest.createdAt,
+            tradeCards: tradeCards
+        } as Card
+    }
 }
 </script>
 
@@ -224,8 +228,8 @@ function presetTradeCards(tradeCard: any): TradeCard {
                             <CardImage
                                 :card="request!.card"
                                 :is-carousel="true"
+                                :is-trade-card="true"
                                 :carousel-slides="carouselSlides"
-                                :type-list="'all'"
                             />
                         </div>
                     </div>

@@ -162,9 +162,9 @@ function presetTradeCards(tradeCard: any): TradeCard {
                         :key="request.id"
                     >
                         <CardImage
-                            :type-list="'all'"
                             :card="request.card"
                             :is-carousel="true"
+                            :is-tradeCard="true"
                             :carousel-slides="carouselSlides"
                             :show-remove-button="true"
                             :remove-fn="removeTradeCard"
