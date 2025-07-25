@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onUpdated, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { notifyError } from '@/helpers'
 
 import BasicPaginator from '@/components/BasicPaginator.vue'
 import CardImage from '@/components/Card/CardImage.vue'
@@ -10,6 +10,7 @@ import type { StoreMethod } from '@/types/tradeCardTypes'
 import type { Card } from '@/types/cardTypes'
 
 import { useCardsStore } from '@/stores/cardsStore'
+
 
 const props = defineProps<{
     typeList: 'my' | 'all'
@@ -25,7 +26,6 @@ const cardsStore = useCardsStore()
 const showAllCardsDialog = defineModel<boolean>({ default: false })
 
 const router = useRouter()
-const quasar = useQuasar()
 
 const isLoading = ref<boolean>(false)
 const hasMore = ref<boolean>(false)
@@ -58,13 +58,9 @@ async function loadCards(page: number) {
     } catch (error) {
         cards.value = []
         hasMore.value = false
-        console.error('Erro ao carregar cartões:', error)
 
-        quasar.notify({
-            color: 'negative',
-            message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+        console.error('Erro ao carregar cartões:', error)
+        notifyError(`Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`)
     } finally {
         isLoading.value = false
     }

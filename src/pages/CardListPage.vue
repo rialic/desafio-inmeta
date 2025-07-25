@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { notifySuccess, notifyError } from '@/helpers'
 
 import BasicPaginator from '@/components/BasicPaginator.vue'
 import CardAddSeveralDialog from '@/components/Card/CardAddSeveralDialog.vue'
@@ -16,7 +16,6 @@ import { useCardsStore } from '@/stores/cardsStore'
 const cardsStore = useCardsStore()
 
 const router = useRouter()
-const quasar = useQuasar()
 
 const cards = ref<Array<Card>>([])
 const currentPage = ref<number>(1)
@@ -70,12 +69,8 @@ async function loadCards(page: number) {
 		hasMore.value = false
 
 		console.error('Erro ao carregar cartões:', error)
+		notifyError(`Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`)
 
-		quasar.notify({
-			color: 'negative',
-			message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
-			icon: 'fa-solid fa-exclamation-circle',
-		})
 	} finally {
 		isLoading.value = false
 	}
@@ -88,20 +83,11 @@ async function addCardToCollection(id: string | Array<string>) {
 		const { status } = await cardsStore.store({ cardIds: !Array.isArray(id) ? [id] : id })
 
 		if (status === 200) {
-			quasar.notify({
-				color: 'positive',
-				message: 'Cartão adicionado à coleção com sucesso',
-				icon: 'fa-solid fa-circle-check',
-			})
+			notifySuccess('Cartão adicionado à coleção com sucesso')
 		}
 	} catch (error) {
 		console.error('Erro ao adicionar cartão:', error)
-
-		quasar.notify({
-			color: 'negative',
-			message: `Ops... ocorreu um erro ao adicionar o cartão. ${String(error)}`,
-			icon: 'fa-solid fa-exclamation-circle',
-		})
+		notifyError(`Ops... ocorreu um erro ao adicionar o cartão. ${String(error)}`)
 	} finally {
 		selectedCards.value = []
 		shownCardAddSeveralDialog.value = false

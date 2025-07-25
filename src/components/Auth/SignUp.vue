@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { notifySuccess, notifyError } from '@/helpers'
+import { required, email } from '@/validators'
+
+import SignUpTopContent from './SignUpTopContent.vue'
+
 import type { AxiosResponse } from 'axios'
 import type { SignUpType } from '@/types/authTypes'
-import { required, email } from '@/validators'
-import { useQuasar } from 'quasar'
 
 import { useAuthStore } from '@/stores/authStore'
 
@@ -16,10 +18,10 @@ const emit = defineEmits<{
     (e: 'toggleSignUp', value: boolean): void
 }>()
 
+/* State */
 const authStore = useAuthStore()
 
-const router = useRouter()
-const quasar = useQuasar()
+const isLoading = ref<boolean>(false)
 const signUpForm = ref<SignUpType>({
     name: null,
     email: null,
@@ -28,24 +30,25 @@ const signUpForm = ref<SignUpType>({
 
 /* Functions */
 async function signUp() {
-    const { status }: AxiosResponse = await authStore.register({ name: signUpForm.value.name, email: signUpForm.value.email, password: signUpForm.value.password })
+    isLoading.value = true
 
-    if (status && (status === 200 || status === 201)) {
-        quasar.notify({
-            color: 'positive',
-            message: 'Cadastrado realizado com sucesso',
-            icon: 'fa-solid fa-circle-check',
-        })
+    try {
+        const { status }: AxiosResponse = await authStore.register({ name: signUpForm.value.name, email: signUpForm.value.email, password: signUpForm.value.password })
 
-        return emit('toggleSignUp', !props.showSignUp)
-    }
+        if (status && (status === 200 || status === 201)) {
+            notifySuccess('Cadastro realizado com sucesso')
 
-    if (status && status === 500) {
-        quasar.notify({
-            color: 'negative',
-            message: 'Ops... tivemos um erro ao realizar o seu cadastro, por favor tente mais tarde.',
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+            return emit('toggleSignUp', !props.showSignUp)
+        }
+
+        if (status && status === 500) {
+            notifyError('Ops... tivemos um erro ao realizar o seu cadastro, por favor tente mais tarde')
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar cartão:', error)
+        notifyError(`Ops... ocorreu um erro ao realizar seu cadastrado. ${String(error)}`)
+    } finally {
+        isLoading.value = false
     }
 }
 </script>
@@ -60,51 +63,10 @@ async function signUp() {
             style="min-height: 750px;"
         >
             <div class="flex column q-gutter-lg">
-                <q-card
-                    flat
-                    class="q-pa-sm"
-                >
-
-                    <div class="flex justify-center q-gutter-md">
-                        <q-btn
-                            outline
-                            dense
-                            no-caps
-                            :ripple="false"
-                            color="grey-10"
-                            class="q-px-lg q-py-sm q-btn--outline-thicker"
-                            style="min-width: 100px;"
-                            @click="emit('toggleSignUp', !props.showSignUp)"
-                        >
-                            <div class="flex column items-center q-gutter-sm">
-                                <q-icon name="fas fa-arrow-right-to-bracket" />
-
-                                <div class="text-center">
-                                    Login
-                                </div>
-                            </div>
-                        </q-btn>
-
-                        <q-btn
-                            outline
-                            dense
-                            no-caps
-                            :ripple="false"
-                            color="grey-10"
-                            class="q-px-lg q-py-sm q-btn--outline-thicker"
-                            style="min-width: 100px;"
-                            @click="router.push({ name: 'guest.cards' })"
-                        >
-                            <div class="flex column items-center q-gutter-sm">
-                                <q-icon name="fas fa-square-poll-horizontal" />
-
-                                <div class="text-center">
-                                    Cartões
-                                </div>
-                            </div>
-                        </q-btn>
-                    </div>
-                </q-card>
+                <SignUpTopContent
+                    :show-sign-up="props.showSignUp"
+                    @toggle-sign-up="emit('toggleSignUp', $event)"
+                />
 
                 <q-card
                     flat
@@ -192,6 +154,7 @@ async function signUp() {
                                         dense
                                         no-caps
                                         :ripple="false"
+                                        :disable="isLoading"
                                         class="text-weight-bold full-width"
                                         unelevated
                                     />

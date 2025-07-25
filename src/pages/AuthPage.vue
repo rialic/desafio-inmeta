@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+
 import SignIn from '@/components/Auth/SignIn.vue'
 import SignUp from '@/components/Auth/SignUp.vue'
 
+/* State */
 const showSignUp = ref<boolean>(false)
 </script>
 
@@ -18,14 +20,14 @@ const showSignUp = ref<boolean>(false)
         >
             <SignIn
                 v-if="!showSignUp"
-                :showSignUp="showSignUp"
-                @toggleSignUp="showSignUp = $event"
+                :show-sign-up="showSignUp"
+                @toggle-sign-up="showSignUp = $event"
             />
 
             <SignUp
                 v-else
-                :showSignUp="showSignUp"
-                @toggleSignUp="showSignUp = $event"
+                :show-sign-up="showSignUp"
+                @toggle-sign-up="showSignUp = $event"
             />
         </q-card>
     </div>

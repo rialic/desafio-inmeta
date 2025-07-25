@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { notifyError } from '@/helpers'
 
 import CardImage from '@/components/Card/CardImage.vue'
 
@@ -15,9 +15,7 @@ import { useTradeCardStore } from '@/stores/tradeCardStore'
 const authStore = useAuthStore()
 const tradeStore = useTradeCardStore()
 
-const quasar = useQuasar()
 const router = useRouter()
-
 const isLoading = ref<boolean>()
 const tradeCardRequests = ref<Array<TradeCardRequests>>([])
 const carouselSlides = ref<Record<string, number>>({})
@@ -46,12 +44,7 @@ async function loadTradeCards(page: number) {
         }
     } catch (error) {
         console.error('Erro ao carregar cartões:', error)
-
-        quasar.notify({
-            color: 'negative',
-            message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+        notifyError(`Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`)
     } finally {
         isLoading.value = false
     }

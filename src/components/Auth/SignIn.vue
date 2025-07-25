@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { required, email } from '@/validators'
-import type { SignInType } from '@/types/authTypes';
+import { notifyError } from '@/helpers'
+
+import SignInTopContent from './SignInTopContent.vue'
+import SignInSideContent from './SignInSideContent.vue'
+
+import type { SignInType } from '@/types/authTypes'
 import type { AxiosResponse } from 'axios'
 
 import { useAuthStore } from '@/stores/authStore'
@@ -15,9 +20,11 @@ const emit = defineEmits<{
     (e: 'toggleSignUp', value: boolean): void
 }>()
 
+/* State */
 const authStore = useAuthStore()
 
 const router = useRouter()
+const isLoading = ref<boolean>(false)
 const hasSignInFormErrors = ref<boolean>(false)
 const signInFormError = ref<string>()
 const signInForm = ref<SignInType>({
@@ -27,15 +34,25 @@ const signInForm = ref<SignInType>({
 
 /* Functions */
 async function signIn() {
-    const { status, data }: AxiosResponse = await authStore.login({ email: signInForm.value.email, password: signInForm.value.password })
+    isLoading.value = true
 
-    if (status && status === 200) {
-        void router.push({ name: 'private.cards' })
-    }
+    try {
+        const { status, data }: AxiosResponse = await authStore.login({ email: signInForm.value.email, password: signInForm.value.password })
 
-    if (status && status === 500) {
-        hasSignInFormErrors.value = true
-        signInFormError.value = data.message
+        if (status && status === 200) {
+            void router.push({ name: 'private.cards' })
+            return
+        }
+
+        if (status && status === 500) {
+            hasSignInFormErrors.value = true
+            signInFormError.value = data.message
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar cartão:', error)
+        notifyError(`Ops... ocorreu um erro ao acessar o sistema. ${String(error)}`)
+    } finally {
+        isLoading.value = false
     }
 }
 </script>
@@ -49,52 +66,12 @@ async function signIn() {
             class="col-12 col-md-6 flex items-center justify-center"
             style="height: 600px;"
         >
+
             <div class="flex column q-gutter-lg">
-                <q-card
-                    flat
-                    class="q-pa-sm"
-                >
-
-                    <div class="flex justify-center q-gutter-md">
-                        <q-btn
-                            outline
-                            dense
-                            no-caps
-                            :ripple="false"
-                            color="grey-10"
-                            class="q-px-lg q-py-sm q-btn--outline-thicker"
-                            style="min-width: 100px;"
-                            @click="emit('toggleSignUp', !props.showSignUp)"
-                        >
-                            <div class="flex column items-center q-gutter-sm">
-                                <q-icon name="fa-solid fa-user-plus" />
-
-                                <div class="text-center">
-                                    Cadastro
-                                </div>
-                            </div>
-                        </q-btn>
-
-                        <q-btn
-                            outline
-                            dense
-                            no-caps
-                            :ripple="false"
-                            color="grey-10"
-                            class="q-px-lg q-py-sm q-btn--outline-thicker"
-                            style="min-width: 100px;"
-                            @click="router.push({ name: 'guest.cards' })"
-                        >
-                            <div class="flex column items-center q-gutter-sm">
-                                <q-icon name="fa-solid fa-square-poll-horizontal" />
-
-                                <div class="text-center">
-                                    Cartões
-                                </div>
-                            </div>
-                        </q-btn>
-                    </div>
-                </q-card>
+                <SignInTopContent
+                    :show-sign-up="props.showSignUp"
+                    @toggle-sign-up="emit('toggleSignUp', $event)"
+                />
 
                 <q-card
                     flat
@@ -151,6 +128,7 @@ async function signIn() {
                                 dense
                                 no-caps
                                 :ripple="false"
+                                :disable="isLoading"
                                 class="text-weight-bold"
                                 unelevated
                             />
@@ -170,36 +148,9 @@ async function signIn() {
             </div>
         </div>
 
-        <div class="col-12 col-md-6 gt-sm flex items-center justify-center">
-            <div
-                class="full-width full-height flex items-center justify-center"
-                style="background: linear-gradient(135deg, #b0bec5 0%, #263238 100%); height: 600px; border-radius: 0 0 0 350px;"
-            >
-                <q-card
-                    flat
-                    class="q-pa-xl text-center bg-white"
-                    style="max-width: 350px; border-radius: 16px;"
-                >
-                    <div class="text-h6 text-grey-10 q-mb-md text-weight-bold">
-                        Ainda não tem uma conta?
-                    </div>
-
-                    <div class="text-body2 text-grey-7 q-mb-lg">
-                        Clique no botão abaixo para criar sua conta em nosso sistema
-                    </div>
-
-                    <q-btn
-                        color="grey-10"
-                        label="Cadastre-se"
-                        no-caps
-                        dense
-                        class="q-px-xl q-py-sm text-weight-bold pulse-grey-10"
-                        outline
-                        :ripple="false"
-                        @click="emit('toggleSignUp', !props.showSignUp)"
-                    />
-                </q-card>
-            </div>
-        </div>
+        <SignInSideContent
+            :show-sign-up="props.showSignUp"
+            @toggle-sign-up="emit('toggleSignUp', $event)"
+        />
     </div>
 </template>

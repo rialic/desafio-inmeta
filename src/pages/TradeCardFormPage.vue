@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { notifySuccess, notifyError } from '@/helpers'
 
 import TradeCardListDialog from '@/components/TradeCard/TradeCardListDialog.vue'
 import TradeCardRemoveDialog from 'src/components/TradeCard/TradeCardRemoveDialog.vue'
@@ -14,7 +14,6 @@ import { useTradeCardStore } from '@/stores/tradeCardStore'
 /* States */
 const tradeCardStore = useTradeCardStore()
 
-const quasar = useQuasar()
 const router = useRouter()
 
 const isLoading = ref<boolean>(false)
@@ -85,27 +84,18 @@ function addOCards(cards: Array<Card>) {
 }
 
 async function saveTradeCard() {
-    isLoading.value = true
     const tradeCards = generateTradeCards(selectedOfferingCards.value, selectedReceivingCards.value)
+    isLoading.value = true
 
     try {
         const { status } = await tradeCardStore.store({ cards: tradeCards })
 
         if (status === 200 || status === 201) {
-            quasar.notify({
-                color: 'positive',
-                message: 'Solicitação de troca criada com sucesso',
-                icon: 'fa-solid fa-circle-check',
-            })
+            notifySuccess('Solicitação de troca criada com sucesso')
         }
     } catch (error) {
         console.error('Erro ao adicionar cartão:', error)
-
-        quasar.notify({
-            color: 'negative',
-            message: `Ops... ocorreu um erro ao solicitação de troca. ${String(error)}`,
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+        notifyError(`Ops... ocorreu um erro ao solicitação de troca. ${String(error)}`)
     } finally {
         isLoading.value = false
 

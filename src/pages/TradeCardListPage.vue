@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
+import { notifySuccess, notifyError } from '@/helpers'
 
 import CardImage from '@/components/Card/CardImage.vue'
 
@@ -15,9 +15,7 @@ import { useTradeCardStore } from '@/stores/tradeCardStore'
 const authStore = useAuthStore()
 const tradeCardStore = useTradeCardStore()
 
-const quasar = useQuasar()
 const router = useRouter()
-
 const isLoading = ref<boolean>(false)
 const tradeCardRequests = ref<Array<TradeCardRequests>>([])
 const carouselSlides = ref<Record<string, number>>({})
@@ -47,12 +45,7 @@ async function loadTradeCards(page: number) {
         }
     } catch (error) {
         console.error('Erro ao carregar cartões:', error)
-
-        quasar.notify({
-            color: 'negative',
-            message: `Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`,
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+        notifyError(`Ops... ocorreu um erro ao carregar os cartões. ${String(error)}`)
     } finally {
         isLoading.value = false
     }
@@ -65,22 +58,12 @@ async function removeTradeCard(id: string) {
         const { status } = await tradeCardStore.delete(id)
 
         if (status === 200) {
-            quasar.notify({
-                color: 'positive',
-                message: 'Solicitação de troca excluída com sucesso.',
-                icon: 'fa-solid fa-circle-check',
-            })
-
+            notifySuccess('Solicitação de troca excluída com sucesso.')
             await loadTradeCards(1)
         }
     } catch (error) {
         console.error('Erro ao adicionar cartão:', error)
-
-        quasar.notify({
-            color: 'negative',
-            message: `Ops... ocorreu um erro ao adicionar o cartão. ${String(error)}`,
-            icon: 'fa-solid fa-exclamation-circle',
-        })
+        notifyError(`Ops... ocorreu um erro ao adicionar o cartão. ${String(error)}`)
     } finally {
         isLoading.value = false
     }
