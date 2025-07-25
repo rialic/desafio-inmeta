@@ -30,6 +30,12 @@ export default [
                 name: 'private.trade-cards-form',
                 component: () => import('pages/TradeCardFormPage.vue'),
                 meta: { requiresAuth: true }
+            },
+            {
+                path: 'perfil',
+                name: 'private.me',
+                component: () => import('pages/UserFormPage.vue'),
+                meta: { requiresAuth: true }
             }
         ]
     }
