@@ -4,9 +4,9 @@
 
 O desafio foi realizado utilizando Vuejs3, Vue Quasar, Pinia e Typescript com um estilo minimalista semelhante ao shadcn ui, todas as especficiações do desafio foram realizadas e implementadas conforme solicitado.
 ### Candidato
--- Rhiali Cândido
-Linkedin: www.linkedin.com/in/rhiali-cândido-8a9408217
-Contato: (67) 99839-0452
+###### Rhiali Cândido
+* Linkedin: www.linkedin.com/in/rhiali-cândido-8a9408217
+* Contato: (67) 99839-0452
 
 ### Execução do projeto
 
@@ -20,9 +20,9 @@ Contato: (67) 99839-0452
    npm run dev
    ```
 2. **Esse projeto também pode ser executado com Docker:**
-    **Especificações**
-    Docker >= 28.0.4
-    Docker Compose >= 1.29.2
+    **Especificações:**
+    * Docker >= 28.0.4
+    * Docker Compose >= 1.29.2
     ```bash
     docker compose run --rm -p 9000:9000 node yarn dev
     ```
