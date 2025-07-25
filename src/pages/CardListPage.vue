@@ -111,9 +111,27 @@ function openSelectedCardsDialog() {
 			Cartões
 		</div>
 
-		<div class="flex q-gutter-md">
+		<div
+			v-if="typeList === 'my'"
+			class="flex q-gutter-md"
+		>
 			<q-btn
-				v-if="typeList === 'all'"
+				dense
+				no-caps
+				unelevated
+				:ripple="false"
+				label="Adicionar cartões"
+				color="grey-9 q-px-sm q-pt-xs"
+				@click="typeList = 'all'"
+			>
+			</q-btn>
+		</div>
+
+		<div
+			v-else
+			class="flex q-gutter-md"
+		>
+			<q-btn
 				dense
 				no-caps
 				unelevated
@@ -170,7 +188,7 @@ function openSelectedCardsDialog() {
 					style="font-size: 12px;"
 					class="text-weight-medium text-grey-9"
 				>
-					Clique na carta para adicionar *
+					Clique na carta para adicionar cartões a sua coleção*
 				</span>
 			</div>
 

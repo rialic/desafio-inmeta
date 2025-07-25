@@ -3,8 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { notifySuccess, notifyError } from '@/helpers'
 
-import TradeCardListDialog from '@/components/TradeCard/TradeCardListDialog.vue'
-import TradeCardRemoveDialog from 'src/components/TradeCard/TradeCardRemoveDialog.vue'
+import ChoicerCard from '@/components/TradeCard/ChoicerCard.vue'
 
 import type { TradeCard } from '@/types/tradeCardTypes'
 import type { Card } from '@/types/cardTypes'
@@ -17,72 +16,15 @@ const tradeCardStore = useTradeCardStore()
 const router = useRouter()
 
 const isLoading = ref<boolean>(false)
-const typeList = ref<'my' | 'all'>('my')
-
-const showTradeCardRemoveDialog = ref<boolean>(false)
-const showTradeCardListDialog = ref<boolean>(false)
-
 const selectedOfferingCards = ref<Array<Card>>([])
 const selectedReceivingCards = ref<Array<Card>>([])
-const selectedCardsToRemove = ref<Array<Card>>([])
 
 /* Computed */
-const getChoiceOpenDialogFn = computed(() => {
-    return (index: number) => (index === 0) ? openTradeCardListDialog('my') : openTradeCardListDialog('all')
-})
-
-const getChoiceComponentTitle = computed(() => {
-    return (index: number) => (index === 0) ? 'Meus Cartões' : 'Todos os Cartões'
-})
-
-const getChoiceComponentSubtitle = computed(() => {
-    return (index: number) => (index === 0) ? 'Escolha os cartões para oferecer' : 'Escolha os cartões que aceita em troca'
-})
-
-const isChoiceComponentListNotEmpty = computed(() => {
-    return (index: number) => (index === 0) ? selectedOfferingCards.value.length > 0 : selectedReceivingCards.value.length > 0
-})
-
-const getChoiceRemoveDialogFn = computed(() => {
-    return (index: number) => (index === 0) ? openTradeCardRemoveDialog(selectedOfferingCards.value) : openTradeCardRemoveDialog(selectedReceivingCards.value)
-})
-
-const getChoiceRemoveFn = computed(() => {
-    return (index: number) => (index === 0) ? clearOfferingCards() : clearReceivingCards()
-})
-
-const getChoiceRemoveTextLink = computed(() => {
-    return (index: number) => (index === 0) ? `Cartões Oferecidos (${selectedOfferingCards.value.length})` : `Cartões Aceitos (${selectedReceivingCards.value.length})`
-})
-
 const enableTradeCardStore = computed(() => {
     return selectedOfferingCards.value.length === 0 || selectedReceivingCards.value.length === 0
 })
 
 /* Functions */
-function openTradeCardListDialog(type: 'my' | 'all') {
-    typeList.value = type
-    showTradeCardListDialog.value = true
-}
-
-function openTradeCardRemoveDialog(list: Array<Card>) {
-    showTradeCardRemoveDialog.value = true
-    selectedCardsToRemove.value = list
-}
-
-function addOCards(cards: Array<Card>) {
-    const selectedCards = typeList.value === 'my' ? selectedOfferingCards : selectedReceivingCards
-    showTradeCardListDialog.value = false
-
-    cards.forEach((card) => {
-        const isCardInList = selectedCards.value.find((selectedCard) => selectedCard.id === card.id)
-
-        if (!isCardInList) {
-            selectedCards.value.push(card)
-        }
-    })
-}
-
 async function saveTradeCard() {
     const tradeCards = generateTradeCards(selectedOfferingCards.value, selectedReceivingCards.value)
     isLoading.value = true
@@ -117,12 +59,6 @@ function clearOfferingCards() {
 
 function clearReceivingCards() {
     selectedReceivingCards.value = []
-}
-
-function clearAll(length: number) {
-    showTradeCardRemoveDialog.value = false
-
-    Array.from({ length }).forEach(() => selectedCardsToRemove.value.pop())
 }
 </script>
 
@@ -166,66 +102,13 @@ function clearAll(length: number) {
                 </div>
 
                 <div class="row q-col-gutter-xl justify-center q-mb-xl">
-                    <div
-                        v-for="(_, index) in Array.from({ length: 2 })"
-                        :key="index"
-                        class="col-12 col-md-6 col-lg-4"
-                    >
-                        <div
-                            class="border-dashed border-grey-6 rounded-borders cursor-pointer q-pa-xl text-center"
-                            style="border-width: 2px; min-height: 200px;"
-                            @click="getChoiceOpenDialogFn(index)"
-                        >
-                            <div class="flex column items-center justify-center full-height q-gutter-md">
-                                <i class="fa-solid fa-plus fa-2x text-grey-6"></i>
-                                <div class="text-h6 text-grey-9 text-weight-medium">
-                                    {{ getChoiceComponentTitle(index) }}
-                                </div>
-                                <div class="text-body2 text-grey-7">
-                                    {{ getChoiceComponentSubtitle(index) }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div
-                            v-if="isChoiceComponentListNotEmpty(index)"
-                            class="q-mt-xs"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="text-subtitle2 text-grey-9 text-weight-medium">
-                                    <q-btn
-                                        flat
-                                        no-caps
-                                        style="text-decoration: underline;"
-                                        color="primary"
-                                        class="q-ma-none"
-                                        :disable="isLoading"
-                                        @click="getChoiceRemoveDialogFn(index)"
-                                    >
-                                        {{ getChoiceRemoveTextLink(index) }}
-                                    </q-btn>
-                                </div>
-
-                                <q-btn
-                                    dense
-                                    no-caps
-                                    flat
-                                    color="negative"
-                                    size="md"
-                                    :disable="isLoading"
-                                    @click="getChoiceRemoveFn(index)"
-                                >
-                                    <div class="flex items-center q-gutter-sm q-px-sm">
-                                        <i class="fa-solid fa-trash"></i>
-
-                                        <div class="text-center">
-                                            Limpar todos
-                                        </div>
-                                    </div>
-                                </q-btn>
-                            </div>
-                        </div>
-                    </div>
+                    <ChoicerCard
+                        :is-loading="isLoading"
+                        :selected-offering-cards=selectedOfferingCards
+                        :selected-receiving-cards=selectedReceivingCards
+                        :clear-offering-cards="clearOfferingCards"
+                        :clear-receiving-cards="clearReceivingCards"
+                    />
                 </div>
 
                 <div class="flex justify-center q-gutter-md q-mt-xl">
@@ -246,27 +129,4 @@ function clearAll(length: number) {
             </q-card>
         </q-card-section>
     </div>
-
-    <TradeCardListDialog
-        v-model="showTradeCardListDialog"
-        :typeList="typeList"
-        @add-cards="addOCards"
-    />
-
-    <TradeCardRemoveDialog
-        v-model="showTradeCardRemoveDialog"
-        :selected-cards="selectedCardsToRemove"
-        @remove-card="(index) => selectedCardsToRemove.splice(index, 1)"
-        @clear-all="clearAll"
-    />
 </template>
-
-<style scoped>
-.border-dashed {
-    border-style: dashed;
-}
-
-.border-grey-6 {
-    border-color: #9e9e9e;
-}
-</style>
