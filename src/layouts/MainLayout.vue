@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import type { BasicLinkProps } from '@/types/mainTypes'
+
 import BasicLink from 'components/BasicLink.vue'
+
+import type { BasicLinkProps } from '@/types/mainTypes'
 
 import { useAuthStore } from '@/stores/authStore'
 
+/* State */
 const authStore = useAuthStore()
 
 const router = useRouter()
@@ -24,7 +27,7 @@ const linksList: BasicLinkProps[] = [
 	{
 		title: 'Perfil',
 		icon: 'fa-solid fa-user',
-		link: 'https://quasar.dev'
+		link: '/perfil'
 	},
 ]
 
@@ -34,7 +37,6 @@ function toggleLeftDrawer() {
 	leftDrawerOpen.value = !leftDrawerOpen.value
 }
 </script>
-
 
 <template>
 	<q-layout view="lHh Lpr lFf">
