@@ -8,7 +8,7 @@ const props = defineProps<{
 /* State */
 const showTradeCardDialog = defineModel<boolean>({ default: false })
 
-const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando']])
+const tradeTypes = new Map([['OFFERING', 'Ofertando'], ['RECEIVING', 'Aceitando']])
 </script>
 
 <template>
@@ -55,14 +55,13 @@ const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando
                                     class="shadow-2"
                                 />
 
-                                <q-chip
-                                    :color="card.type === 'OFFERING' ? 'green-8' : 'blue-8'"
-                                    text-color="white"
-                                    class="absolute-top-right"
-                                    style="margin: 8px;"
+                                <q-badge
+                                    :color="card.type === 'OFFERING' ? 'teal-8' : 'light-blue-8'"
+                                    class="absolute-top-right q-px-sm q-py-xs text-body2 text-weight-medium"
+                                    style="top: -14px; right: -12px;"
                                 >
                                     {{ tradeTypes.get(card.type) }}
-                                </q-chip>
+                                </q-badge>
                             </div>
 
                             <div

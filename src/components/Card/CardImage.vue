@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { format, parseISO } from 'date-fns'
 
 import CardImageCtaButtons from '@/components/Card/CardImageCtaButtons.vue'
@@ -37,13 +37,23 @@ const emit = defineEmits<{
 }>()
 
 /* State */
-const tradeTypes = new Map([['OFFERING', 'Oferecendo'], ['RECEIVING', 'Aceitando']])
+const tradeTypes = new Map([['OFFERING', 'Ofertando'], ['RECEIVING', 'Aceitando']])
+
+const tradeTypeText = ref<string | null>(null)
+const tradeTypeColor = ref<string | null>(null)
 
 /* Computed */
 const toggleCardSelectionStyle = computed(() => {
     if (props.isCarousel) return () => undefined
 
     return (card: Card) => ({ border: props.isCardSelected(card.id) ? '2px solid currentColor' : undefined })
+})
+
+const toggleTradeTypes = computed(() => {
+    return (type: string) => {
+        tradeTypeText.value = tradeTypes.get(type)!
+        tradeTypeColor.value = type === 'OFFERING' ? 'teal-8' : 'light-blue-9'
+    }
 })
 
 /* Functions */
@@ -104,17 +114,20 @@ function truncateText(text: string, maxLength: number = 23): string {
                                 </template>
                             </q-img>
 
-                            <div
-                                class="absolute-top-right q-pa-sm rounded-borders"
-                                :class="card.type === 'OFFERING' ? 'bg-green-8' : 'bg-blue-8'"
-                                style="opacity: .8;"
-                            >
-                                <span class="text-white text-weight-medium text-caption">
-                                    {{ tradeTypes.get(card.type) }}
-                                </span>
-                            </div>
+                            {{ toggleTradeTypes(card.type) }}
                         </q-carousel-slide>
                     </q-carousel>
+                    <div
+                        class="absolute-top-right rounded-borders"
+                        style="top: -16px; right: -22px;"
+                    >
+                        <q-badge
+                            :color="tradeTypeColor!"
+                            class="q-px-sm q-py-xs text-body2 text-weight-medium"
+                        >
+                            {{ tradeTypeText }}
+                        </q-badge>
+                    </div>
                 </template>
 
                 <q-img
